@@ -1,0 +1,7 @@
+const V="intilaqa-89e73aae21";const PRE=["./", "./academy.html", "./apple-touch-icon.png", "./chair.html", "./clinic.html", "./evidence.html", "./icon-192.png", "./icon-512.png", "./index.html", "./manifest-academy.webmanifest", "./manifest-chair.webmanifest", "./manifest-clinic.webmanifest", "./manifest-evidence.webmanifest", "./manifest-research.webmanifest", "./manifest-student.webmanifest", "./manifest-students.webmanifest", "./maskable-512.png", "./research.html", "./student.html", "./students.html"];
+self.addEventListener("install",e=>{e.waitUntil(caches.open(V).then(c=>c.addAll(PRE)).then(()=>self.skipWaiting()))});
+self.addEventListener("activate",e=>{e.waitUntil(caches.keys().then(ks=>Promise.all(ks.filter(k=>k!==V&&k.startsWith("intilaqa-")).map(k=>caches.delete(k)))).then(()=>self.clients.claim()))});
+self.addEventListener("fetch",e=>{const r=e.request;if(r.method!=="GET")return;const u=new URL(r.url);
+ if(u.origin===location.origin){e.respondWith(fetch(r).then(res=>{const cp=res.clone();caches.open(V).then(c=>c.put(r,cp));return res}).catch(()=>caches.match(r,{ignoreSearch:true}).then(m=>m||caches.match("./index.html"))));return}
+ if(/fonts\.(googleapis|gstatic)\.com$/.test(u.hostname)){e.respondWith(caches.open(V+"-fonts").then(c=>c.match(r).then(m=>m||fetch(r).then(res=>{c.put(r,res.clone());return res}).catch(()=>m))))}
+});
