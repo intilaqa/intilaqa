@@ -1,0 +1,1 @@
+window.INTILAQA_CONFIG = { url: 'https://fzpfjfbmlghtvpcvuunh.supabase.co', key: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ6cGZqZmJtbGdodHZwY3Z1dW5oIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTMxMDQ1NTYsImV4cCI6MjEwODY4MDU1Nn0.V23-EKx6irV1iguI1KsVPmFkQe-Mvk3AMD3idOIvALI' };
