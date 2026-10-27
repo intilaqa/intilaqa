@@ -1,4 +1,4 @@
-<!doctype html><html lang="ar" dir="rtl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"><link rel="manifest" href="manifest-student.webmanifest"><meta name="theme-color" content="#00a3c4"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="default"><meta name="apple-mobile-web-app-title" content="انطلاقة للطلاب"><link rel="apple-touch-icon" href="apple-touch-icon.png"><link rel="icon" href="icon-192.png"><script>if("serviceWorker" in navigator){addEventListener("load",function(){navigator.serviceWorker.register("sw.js").catch(function(){})})}</script></head><body><title>انطلاقة للطلاب</title>
+<!doctype html><html lang="ar" dir="rtl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"><link rel="manifest" href="manifest-student.webmanifest"><meta name="theme-color" content="#00a3c4"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="default"><meta name="apple-mobile-web-app-title" content="انطلاقة للطلاب"><link rel="apple-touch-icon" href="apple-touch-icon.png"><link rel="icon" href="icon-192.png"><script src="config.js"></script><script src="sync.js"></script><script>if("serviceWorker" in navigator){addEventListener("load",function(){navigator.serviceWorker.register("sw.js").catch(function(){})})}</script></head><body><title>انطلاقة للطلاب</title>
 
 <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet">
 <style>
@@ -52,9 +52,9 @@ label.f input,label.f select{display:block;width:100%;margin-top:4px;border:1px 
 .bd .e{font-size:34px}.bd b{display:block;font-size:14px}.bd span{font-size:11.5px;color:var(--muted)}
 .bd.off{opacity:.38;filter:grayscale(1)}
 .bd.on{border-color:#f0d58a;background:linear-gradient(180deg,#fffaf0,#fff)}
-.hrs{display:grid;grid-template-columns:1fr 90px 120px auto;gap:8px;align-items:center;padding:8px 0;border-bottom:1px solid var(--line);font-size:14px}
+.hrs{display:grid;grid-template-columns:1fr 1fr 80px 130px auto;gap:8px;align-items:center;padding:8px 0;border-bottom:1px solid var(--line);font-size:14px}
 .hrs:last-child{border:0}
-@media(max-width:520px){.hrs{grid-template-columns:1fr 70px auto}.hrs .d{display:none}.badges{grid-template-columns:repeat(3,1fr)}.av{grid-template-columns:repeat(6,1fr)}}
+@media(max-width:520px){.hrs{grid-template-columns:1fr 1fr;padding:10px 0}.badges{grid-template-columns:repeat(3,1fr)}.av{grid-template-columns:repeat(6,1fr)}}
 .hrs input{width:100%;border:1px solid var(--line);border-radius:8px;padding:6px}
 .note{background:#e3f6fa;border-radius:14px;padding:10px 14px;font-size:14px;margin-top:10px}
 .toast{position:fixed;bottom:calc(20px + env(safe-area-inset-bottom,0px));left:50%;transform:translateX(-50%) translateY(30px);background:#fff;border:2px solid var(--teal);color:var(--navy);padding:12px 20px;border-radius:30px;box-shadow:0 10px 30px rgba(28,55,104,.18);font-weight:800;opacity:0;transition:.35s;z-index:20;max-width:92vw;text-align:center}
@@ -64,6 +64,21 @@ label.f input,label.f select{display:block;width:100%;margin-top:4px;border:1px 
 .mbox{background:#fff;border-radius:18px;padding:18px;max-width:460px;width:100%}
 .chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
 @media(prefers-reduced-motion:reduce){.me .ava{animation:none}.xp i{transition:none}}
+
+#repOv{position:fixed;inset:0;z-index:50;background:#e9eef4;overflow:auto;padding:12px}
+.rbar{display:flex;gap:8px;justify-content:center;margin-bottom:12px;position:sticky;top:0}.rbar .rcl{background:#fff;color:#1c3768;border:1px solid #cfd8e3}
+.rpaper{background:#fff;max-width:794px;margin:0 auto;padding:28px 30px;border-radius:8px;box-shadow:0 4px 20px rgba(0,0,0,.08);color:#22303f;font-size:14px;line-height:1.6}
+.rhd{display:flex;justify-content:space-between;align-items:center;border-bottom:3px solid #1c3768;padding-bottom:10px}.rhd img{height:44px}.rhd img.c{height:56px}
+.rpaper h1{text-align:center;color:#1c3768;font-size:22px;margin:16px 0 2px}.rsub{text-align:center;color:#5d6b7a;font-size:12px;margin-bottom:14px}
+.rpaper table{width:100%;border-collapse:collapse;margin:10px 0;font-size:13.5px;border-radius:0}.rpaper th{background:#1c3768;color:#fff;padding:7px;border:1px solid #1c3768;text-align:center}.rpaper td{border:1px solid #cfd8e3;padding:7px;text-align:center}
+.rpaper td.tl{text-align:right}.rpaper .ri td:first-child{background:#eef4fb;font-weight:700;color:#1c3768;width:32%;white-space:nowrap;text-align:right}.rpaper .ri td{text-align:right}
+.rpaper h3{color:#1c3768;font-size:15px;margin:16px 0 4px}
+.rtot{display:flex;gap:10px;justify-content:center;margin:12px 0;flex-wrap:wrap}.rtot div{border:1px solid #cfd8e3;border-radius:10px;padding:8px 18px;text-align:center;min-width:130px}.rtot b{display:block;font-size:24px;color:#1c3768}.rtot span{font-size:12px;color:#5d6b7a}
+.rsig{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-top:28px}.rsig div{line-height:2.3}.rsig b{color:#1c3768}
+.rnote{font-size:11.5px;color:#5d6b7a;margin-top:18px;text-align:center}
+@media print{html,body{background:#fff!important}body.rep>*:not(#repOv){display:none!important}#repOv{position:static;background:#fff;padding:0;overflow:visible}.noprint{display:none!important}.rpaper{box-shadow:none;max-width:none;padding:0;border-radius:0}@page{size:A4;margin:14mm}}
+.hrh{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:6px;font-size:13px;color:var(--muted)}
+.po{display:none}@media print{.po{display:inline}}
 </style>
 
 <header><div><img id="lP" alt="انطلاقة"></div><div class="c"><img id="lA" alt="اعتماد"></div><div class="l"><img id="lC" alt="كلية الأعمال"></div></header>
@@ -85,7 +100,7 @@ const AR=['يناير','فبراير','مارس','أبريل','مايو','يون
 const fd=d=>{if(!d)return'';const[y,m,dd]=d.split('-');return `${+dd} ${AR[+m-1]}`};
 const monthKey=()=>today().slice(0,7);const monthName=k=>{const[y,m]=k.split('-');return `${AR[+m-1]} ${y}`};
 const AVATARS=['🦊','🦉','🐯','🐼','🐬','🦁','🐧','🦄','🐝','🐢','🦅','🐺','🐨','🐙','🦋','🐲'];
-const TEAMS=['بحث 1: الذكاء الاصطناعي في التعلم','بحث 2: التحول الرقمي في المنشآت','بحث 3: دراسة حالة العيادة','بحث 4: بحث مشترك','العيادة الرقمية: المشروع الأول','العيادة الرقمية: المشروع الثاني','أكاديمية المهارات'];
+const TEAMS=['فريق بحث 1','فريق بحث 2','فريق بحث 3','فريق بحث 4','العيادة الرقمية: المشروع الأول','العيادة الرقمية: المشروع الثاني','أكاديمية المهارات'];
 const MISSIONS=[['🎓','حضور ورشة مهارات البحث العلمي'],['📋','المساعدة في جمع البيانات للفريق'],['💻','المشاركة في بناء حل العيادة الرقمية'],['🧑‍🏫','المساعدة في تنظيم دورة أكاديمية المهارات'],['🎤','تقديم عرض قصير في «يوم انطلاقة»']];
 const LEVELS=[[0,'🌱','مستكشف'],[30,'🔍','باحث صغير'],[80,'🧪','باحث ميداني'],[140,'🚀','باحث منطلق'],[220,'🎓','باحث المستقبل']];
 const CHEERS=['مهمة منجزة! أستاذك سيفتخر بك 😎','أحسنت! المحكّمون يرتجفون من الآن 😄','رائع! سيرتك الذاتية صارت أطول بسطر 📄','بطل! «يوم انطلاقة» ينتظرك 🏆','+10 نقاط… والعقل يكبر 🧠'];
@@ -94,11 +109,11 @@ const pick=a=>a[Math.floor(Math.random()*a.length)];
 let S;const KEY='intilaqa_student';
 function seed(){return {sid:uid(),name:'',team:TEAMS[0],sem:'الأول',ava:'🦊',tasks:MISSIONS.map(([i,t])=>({id:uid(),ic:i,task:t,due:'',status:'todo'})),hours:[],evidence:[],setup:false}}
 function load(){try{const x=localStorage.getItem(KEY);S=x?JSON.parse(x):seed()}catch(e){S=seed()}}
-function save(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}render()}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}render();window.SYNC&&SYNC.dirty()}
 let DB=null;const mem={};
 function openDB(){return new Promise(r=>{setTimeout(r,1500);try{const q=indexedDB.open('intilaqa_student_files',1);q.onupgradeneeded=()=>q.result.createObjectStore('f');q.onsuccess=()=>{DB=q.result;r()};q.onerror=()=>r()}catch(e){r()}})}
 const putF=(id,b)=>new Promise(r=>{if(!DB){mem[id]=b;return r()}const t=DB.transaction('f','readwrite');t.objectStore('f').put(b,id);t.oncomplete=r;t.onerror=()=>{mem[id]=b;r()}});
-const getF=id=>new Promise(r=>{if(mem[id])return r(mem[id]);if(!DB)return r(null);const q=DB.transaction('f').objectStore('f').get(id);q.onsuccess=()=>r(q.result);q.onerror=()=>r(null)});
+const getF=async id=>{const b=await __getFLocal(id);if(b||!window.SYNC)return b;try{return await SYNC.fetchFile(id)}catch(e){return null}};window.__getFLocal=id=>__getFLocal(id);const __getFLocal=id=>new Promise(r=>{if(mem[id])return r(mem[id]);if(!DB)return r(null);const q=DB.transaction('f').objectStore('f').get(id);q.onsuccess=()=>r(q.result);q.onerror=()=>r(null)});
 const toB64=b=>new Promise(r=>{const f=new FileReader();f.onload=()=>r(f.result);f.readAsDataURL(b)});
 function d2b(u){const [h,b]=u.split(',');const mime=(h.match(/data:([^;]+)/)||[])[1]||'application/octet-stream';const bin=atob(b);const a=new Uint8Array(bin.length);for(let i=0;i<bin.length;i++)a[i]=bin.charCodeAt(i);return new Blob([a],{type:mime})}
 let DLCAP=null;
@@ -115,8 +130,14 @@ function badges(){const d=doneN(),h=hoursN(),ev=S.evidence.length;return [
  ['🎟️','أول خطوة','أنجز أول مهمة',d>=1],['📸','الموثّق','ارفع أول دليل',ev>=1],['⏱️','10 ساعات','10 ساعات تطوع',h>=10],
  ['🔬','الباحث','3 مهام منجزة',d>=3],['🤝','خادم المجتمع','20 ساعة تطوع',h>=20],['🏆','أسطورة انطلاقة','كل المهام',S.tasks.length>0&&d===S.tasks.length]]}
 
+
+function printReport(title,inner){let o=document.getElementById('repOv');if(o)o.remove();o=document.createElement('div');o.id='repOv';
+ o.innerHTML=`<div class="rbar noprint"><button class="btn" id="repPrint">🖨️ طباعة / حفظ PDF</button><button class="btn rcl" id="repClose">إغلاق</button></div><div class="rpaper"><div class="rhd"><img src="${LOGO_PROG}" alt=""><img src="${LOGO_ACC}" class="c" alt=""><img src="${LOGO_COB}" alt=""></div><h1>${title}</h1><div class="rsub">برنامج «انطلاقة» · لجنة البحث العلمي وخدمة المجتمع · قسم نظم المعلومات الإدارية · كلية الأعمال · جامعة الباحة</div>${inner}</div>`;
+ document.body.appendChild(o);document.body.classList.add('rep');o.querySelector('#repPrint').onclick=()=>window.print();o.querySelector('#repClose').onclick=()=>{o.remove();document.body.classList.remove('rep')}}
+const fdl=d=>{if(!d)return'—';const p=d.split('-');return p.length===3?`${+p[2]}/${+p[1]}/${p[0]}`:d};
 /* ---------- render ---------- */
-function render(){if(!S.setup)return renderSetup();
+function render(){__render0();window.SYNC&&SYNC.afterRender()}
+function __render0(){if(!S.setup)return renderSetup();
  const L=lvl(),B=badges(),got=B.filter(b=>b[3]).length;
  $('#app').innerHTML=`<div class="hero"><div class="me"><div class="ava">${S.ava}</div><div><h1>أهلاً يا ${esc(S.name.split(' ')[0])} 👋</h1><p>${esc(S.team)} · الفصل ${esc(S.sem)}</p></div></div>
  <div class="lvl"><div class="row"><span>${L.cur[1]} ${L.cur[2]}</span><span>${L.nx?`${L.nx[0]-L.p} نقطة للمستوى التالي ${L.nx[1]}`:'أعلى مستوى! 👑'}</span></div><div class="xp"><i style="width:${L.pct}%"></i></div></div>
@@ -128,7 +149,7 @@ function render(){if(!S.setup)return renderSetup();
   <div class="ctl"><div class="seg">${[['todo','لم أبدأ'],['doing','أشتغل عليها'],['done','خلصت']].map(([k,n])=>`<button data-k="${k}" class="${t.status===k?'on':''}">${n}</button>`).join('')}</div><button class="btn l sm" data-up="${t.id}">📸 دليل</button>${t.custom?'<button class="btn l sm" data-del>✕</button>':''}</div></div></div>`).join('')}
   <div style="margin-top:10px"><button class="btn l sm" id="addT">+ مهمة كلّفني بها المشرف</button></div></div>
 
- <h2>⏱️ ساعات التطوع</h2><div class="card">${S.hours.map(h=>`<div class="hrs" data-h="${h.id}"><input data-hf="what" value="${esc(h.what)}" placeholder="ماذا عملت؟"><input type="number" min="0" step="0.5" data-hf="h" value="${h.h}" aria-label="الساعات"><input class="d" type="date" data-hf="date" value="${h.date}" aria-label="التاريخ"><button class="btn l sm" data-hdel>✕</button></div>`).join('')||'<div style="color:var(--muted)">سجّل كل مرة تطوعت فيها… كل ساعة = 3 نقاط ⏳</div>'}
+ <h2>⏱️ ساعات التطوع</h2><div class="card"><div class="hrh"><span>كل ساعة = 3 نقاط ⭐</span><button class="btn sm" id="volRep">📄 تقرير ساعاتي التطوعية</button></div>${S.hours.map(h=>`<div class="hrs" data-h="${h.id}"><input data-hf="what" value="${esc(h.what)}" placeholder="ماذا عملت؟"><input data-hf="where" value="${esc(h.where||'')}" placeholder="الجهة المستفيدة"><input type="number" min="0" step="0.5" data-hf="h" value="${h.h}" aria-label="الساعات"><input class="d" type="date" data-hf="date" value="${h.date}" aria-label="التاريخ"><button class="btn l sm" data-hdel>✕</button></div>`).join('')||'<div style="color:var(--muted)">سجّل كل مرة تطوعت فيها… كل ساعة = 3 نقاط ⏳</div>'}
   <div style="margin-top:10px"><button class="btn l sm" id="addH">+ إضافة ساعات</button></div></div>
 
  <h2>🏅 أوسمتي <span style="font-size:14px;color:var(--muted)">(${got} من ${B.length})</span></h2><div class="badges">${B.map(b=>`<div class="bd ${b[3]?'on':'off'}"><div class="e">${b[0]}</div><b>${b[1]}</b><span>${b[2]}</span></div>`).join('')}</div>
@@ -155,22 +176,28 @@ document.addEventListener('click',async e=>{
  const up=e.target.closest('[data-up]');if(up){upFor=up.dataset.up;$('#fIn').click();return}
  if(e.target.closest('[data-del]')){S.tasks=S.tasks.filter(x=>x.id!==e.target.closest('[data-t]').dataset.t);save();return}
  if(e.target.id==='addT'){S.tasks.push({id:uid(),ic:'⭐',task:'',due:'',status:'todo',custom:true});save();return}
- if(e.target.id==='addH'){S.hours.push({id:uid(),what:'',h:1,date:today()});save();return}
+ if(e.target.id==='volRep'){const T=S.hours.filter(h=>(h.what||'').trim()||+h.h).slice().sort((a,b)=>(a.date||'')<(b.date||'')?-1:1);const H=hoursN();
+  printReport('تقرير الساعات التطوعية',`<table class="ri"><tr><td>اسم الطالب/ة</td><td>${esc(S.name)}</td></tr><tr><td>الرقم الجامعي</td><td><input id="uniIn" class="noprint" value="${esc(S.uni||'')}" placeholder="اكتب رقمك الجامعي" style="border:1px solid #cfd8e3;border-radius:8px;padding:4px 8px;font:inherit;width:100%;max-width:220px;box-sizing:border-box"><span class="po">${esc(S.uni||'')}</span></td></tr><tr><td>الفريق</td><td>${esc(S.team)}</td></tr><tr><td>الفصل الدراسي</td><td>${esc(S.sem)} · 1448هـ</td></tr><tr><td>تاريخ التقرير</td><td>${fdl(today())}</td></tr></table>
+  <h3>الأنشطة التطوعية</h3><table><tr><th>م</th><th>النشاط</th><th>الجهة المستفيدة</th><th>التاريخ</th><th>الساعات</th></tr>${T.map((h,i)=>`<tr><td>${i+1}</td><td class="tl">${esc(h.what||'—')}</td><td>${esc(h.where||'—')}</td><td>${fdl(h.date)}</td><td>${+h.h||0}</td></tr>`).join('')||'<tr><td colspan="5">لا توجد ساعات مسجّلة بعد</td></tr>'}</table>
+  <div class="rtot"><div><b>${H}</b><span>إجمالي الساعات التطوعية</span></div><div><b>${Math.round(H*3)}</b><span>النقاط التطوعية (3 لكل ساعة)</span></div><div><b>${T.length}</b><span>عدد الأنشطة</span></div></div>
+  <div class="rsig"><div><b>الطالب/ة</b><br>الاسم: ${esc(S.name)}<br>التوقيع: ..............................</div><div><b>اعتماد مشرف «باحث المستقبل»</b><br>الاسم: ..............................<br>التوقيع: ..............................</div></div>
+  <div class="rnote">صادر من تطبيق «انطلاقة» · الساعات يسجّلها الطالب ويعتمدها المشرف</div>`);
+  const u=document.getElementById('uniIn');if(u)u.onchange=()=>{S.uni=u.value.trim();u.nextElementSibling.textContent=S.uni;save()};return}
+ if(e.target.id==='addH'){S.hours.push({id:uid(),what:'',where:'',h:1,date:today()});save();return}
  if(e.target.closest('[data-hdel]')){S.hours=S.hours.filter(x=>x.id!==e.target.closest('[data-h]').dataset.h);save();return}
  if(e.target.id==='send'){const files=[];for(const ev of S.evidence){const b=await getF(ev.id);if(b)files.push({id:ev.id,data:await toB64(b)})}
-  const rep={app:'intilaqa-student',month:monthKey(),exported:today(),student:{sid:S.sid,name:S.name,team:S.team,sem:S.sem,ava:S.ava,hours:hoursN(),xp:xp(),tasks:S.tasks.map(t=>({id:t.id,task:t.task,due:t.due,status:t.status})),evidence:S.evidence},files};
+  const rep={app:'intilaqa-student',month:monthKey(),exported:today(),student:{sid:S.sid,name:S.name,team:S.team,sem:S.sem,ava:S.ava,hours:hoursN(),hoursLog:S.hours,xp:xp(),tasks:S.tasks.map(t=>({id:t.id,task:t.task,due:t.due,status:t.status})),evidence:S.evidence},files};
   const ok=await download(`انطلاقة_طالب_${S.name.replace(/\s+/g,'_')}_${monthName(monthKey()).replace(' ','_')}.json`,JSON.stringify(rep));if(ok){S.lastSent=today();save();confetti(140);toast('📨 جاهز! أرسله الآن لأ. عبدالعزيز 🎉')}return}
  if(e.target.id==='bk'){const files=[];for(const ev of S.evidence){const b=await getF(ev.id);if(b)files.push({id:ev.id,data:await toB64(b)})}download(`انطلاقة_طالب_نسخة_احتياطية_${today()}.json`,JSON.stringify({app:'intilaqa-student-backup',state:S,files}));return}
  if(e.target.id==='rs'){$('#bIn').click();return}
 });
 document.addEventListener('change',async e=>{const el=e.target;
  if(el.dataset.tf){const t=S.tasks.find(x=>x.id===el.closest('[data-t]').dataset.t);t[el.dataset.tf]=el.value;save();return}
- if(el.dataset.hf){const h=S.hours.find(x=>x.id===el.closest('[data-h]').dataset.h);const was=hoursN();h[el.dataset.hf]=el.dataset.hf==='h'?(+el.value||0):el.value;save();if(was<10&&hoursN()>=10){confetti();toast('⏱️ وسام «10 ساعات» صار لك!')}return}
+ if(el.dataset.hf){const h=S.hours.find(x=>x.id===el.closest('[data-h]').dataset.h);const was=hoursN();h[el.dataset.hf]=el.dataset.hf==='h'?(+el.value||0):el.value;if(el.dataset.hf!=='h'){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}window.SYNC&&SYNC.dirty();return}save();if(was<10&&hoursN()>=10){confetti();toast('⏱️ وسام «10 ساعات» صار لك!')}return}
  if(el.id==='fIn'){for(const f of el.files){const id=uid();await putF(id,f);S.evidence.push({id,name:f.name,size:f.size,type:f.type,link:upFor,added:today()})}el.value='';const first=S.evidence.length===1;save();toast(first?'📸 وسام «الموثّق» صار لك!':'📎 تم حفظ الدليل');if(first)confetti();return}
  if(el.id==='bIn'){const f=el.files[0];el.value='';if(!f)return;try{const j=JSON.parse(await f.text());if(j.app!=='intilaqa-student-backup')throw 0;for(const x of j.files||[])await putF(x.id,d2b(x.data));S=j.state;save();toast('✓ تمت الاستعادة')}catch(err){toast('الملف ليس نسخة احتياطية لهذه الصفحة')}}
 });
 $('#lP').src=LOGO_PROG;$('#lA').src=LOGO_ACC;$('#lC').src=LOGO_COB;
-try{load();render()}catch(e){window.__showErr&&window.__showErr(e)}
-openDB();
+window.__init=()=>{try{load();render()}catch(e){window.__showErr&&window.__showErr(e)}openDB()};window.__rawRender=()=>render();if(window.SYNC)SYNC.boot();else __init();
 </script>
 <div style="text-align:center;font-size:12px;color:#8a97a8;padding:18px 16px 28px;font-family:Tajawal,Tahoma,Arial,sans-serif">© 1448هـ «انطلاقة» — فكرة وتصميم: أ. نعيمة الرشيدي · قسم نظم المعلومات الإدارية · كلية الأعمال · جامعة الباحة</div></body></html>
