@@ -1,0 +1,23 @@
+name: keep-alive
+on:
+  schedule:
+    - cron: "17 6 */2 * *"
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Ping database
+        run: |
+          URL=$(grep -o "url: *'[^']*'" config.js | sed "s/url: *'//; s/'$//")
+          KEY=$(grep -o "key: *'[^']*'" config.js | sed "s/key: *'//; s/'$//")
+          curl -fsS -X POST "$URL/rest/v1/rpc/ping" -H "apikey: $KEY" -H "Content-Type: application/json" -d '{}'
+      - name: Keep repository active
+        run: |
+          git config user.name "intilaqa-bot"
+          git config user.email "intilaqa-bot@users.noreply.github.com"
+          git commit --allow-empty -m "keep-alive $(date -u +%F)"
+          git push
