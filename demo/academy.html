@@ -369,14 +369,14 @@ const KEY='demo_intilaqa_v2_'+ROLE; let S, canStore=true;
 function __demo(S){try{
  S.names={chair:'أ. نعيمة الرشيدي',research:'د. مفزع القحطاني',clinic:'د. أحلام الزهراني',academy:'أ. سناء الغامدي',students:'أ. عبدالعزيز آل سحيم',evidence:'د. سلمى الخليفة'};
  const byRole={};S.tasks.slice().sort((a,b)=>a.due<b.due?-1:1).forEach(t=>{(byRole[t.role]=byRole[t.role]||[]).push(t)});
- const pct={chair:.6,research:.45,clinic:.4,academy:.5,students:.5,evidence:.55};
+ const pct={chair:.6,research:.75,clinic:.5,academy:.25,students:.75,evidence:.5};
  Object.entries(byRole).forEach(([r,L])=>{const n=Math.round(L.length*(pct[r]||.4));L.forEach((t,i)=>{t.status=i<n?'done':i===n?'doing':'todo';if(i<n){t.updated='2026-10-20';t.note=i===0?'تم ✔️':''}})});
  const R=S.research;
  Object.assign(R[0],{title:'أثر أدوات الذكاء الاصطناعي التوليدي على تعلّم طلاب نظم المعلومات (مثال)',team:'د. مفزع القحطاني',mem:['د. باحث مشارك 1','د. باحث مشارك 2','أ. باحثة مشاركة 3'],station:3,journal:'مجلة محكّمة (مثال)',ethics:'معتمدة'});
  Object.assign(R[1],{title:'التحول الرقمي في المنشآت الصغيرة بمنطقة الباحة (مثال)',team:'د. باحث قائد 2',mem:['د. باحث مشارك 4','د. باحث مشارك 5'],station:2,ethics:'قيد المراجعة'});
  Object.assign(R[2],{title:'جاهزية الأمن السيبراني لدى الجمعيات الأهلية (مثال)',team:'د. باحث قائد 3',mem:['د. باحث مشارك 6'],station:1,ethics:'لم يُطلب بعد'});
  const A=id=>S.acts.find(a=>a.id===id)||{};
- Object.assign(A('a1'),{done:true,ben:18,sat:'92'});Object.assign(A('a2'),{done:true,ben:35,sat:'95'});
+ Object.assign(A('a1'),{done:true,ben:18,sat:'4.6'});Object.assign(A('a2'),{done:true,ben:35,sat:'4.8'});
  S.ideas=[{id:'i1',role:'research',title:'نادي الباحثين الصغار',note:'لقاء شهري يعرض فيه الطلاب ما تعلموه من فرق البحث',date:'2026-10-21'},
   {id:'i2',role:'clinic',title:'يوم الاستشارات الرقمية المفتوح',note:'يوم واحد في الفصل تستقبل فيه العيادة أصحاب المنشآت الصغيرة',date:'2026-10-23'},
   {id:'i3',role:'students',title:'سفراء انطلاقة',note:'طالبان من كل دفعة يعرّفون زملاءهم بالبرنامج',date:'2026-10-25'}];
@@ -410,13 +410,13 @@ const state=t=>t.status==='done'?'done':(t.due<today()?'late':t.status);
 const soon=t=>t.status!=='done'&&t.due>=today()&&t.due<=new Date(Date.now()+14*864e5).toISOString().slice(0,10);
 const evOf=link=>S.evidence.filter(e=>e.link===link);
 function headline(){
- const r=S.research,a=S.acts,done=a.filter(x=>x.done);const sats=done.map(x=>parseFloat(x.sat)).filter(x=>!isNaN(x));
+ const r=S.research,a=S.acts,done=a.filter(x=>x.done);const sats=done.map(x=>parseFloat(x.sat)).filter(x=>!isNaN(x)&&x>0).map(x=>x<=5?x/5*100:Math.min(x,100));
  return [
   {t:'أوراق بحثية مُرسلة',v:r.filter(x=>x.station>=5||x.subNo).length,goal:4},
   {t:'بحوث تجاوزت المسودة',v:r.filter(x=>x.station>=4).length,goal:4},
   {t:'أنشطة مجتمعية منفذة',v:done.length,goal:4},
   {t:'مستفيدون من المجتمع',v:a.reduce((p,c)=>p+(+c.ben||0),0),goal:100},
-  {t:'رضا المستفيدين',v:sats.length?Math.round(sats.reduce((p,c)=>p+c,0)/sats.length/5*100):0,goal:85,unit:'%'},
+  {t:'رضا المستفيدين',v:sats.length?Math.round(sats.reduce((p,c)=>p+c,0)/sats.length):0,goal:85,unit:'%'},
   {t:'طلاب مشاركون',v:S.students.length,goal:10},
  ];
 }
@@ -559,7 +559,7 @@ function renderExtra(){let h='';
   <label class="f">رقم الإرسال<input data-f="subNo" value="${esc(r.subNo)}" dir="ltr"></label><label class="f">قرار المجلة<select data-f="decision">${['—','قيد التحكيم','تعديلات','مقبول','مرفوض'].map(x=>`<option ${x===r.decision?'selected':''}>${x}</option>`).join('')}</select></label></div></div>
   <button class="btn light sm" data-up="r:${r.id}">📎 إرفاق دليل آخر${ev?' ('+ev+')':''}</button></div></details>`}).join('')}
  if(ROLE==='clinic'||ROLE==='academy'){h=`<h2>${ROLE==='clinic'?'مشروعات العيادة الرقمية':'دورات أكاديمية المهارات'}</h2>`+mine(S.acts).map(a=>`<div class="card" data-a="${a.id}"><div style="font-weight:700">${esc(a.name)} <span class="tag ${a.done?'done':''}" style="${a.done?'':'background:#eef1f5'}">${a.done?'مُنفَّذ':'لم يُنفَّذ بعد'}</span></div><div class="m" style="font-size:13px;color:var(--muted)">${esc(a.org)}</div>
-  <div class="grid g3" style="margin-top:10px"><label class="f">تاريخ التنفيذ<input type="date" data-f="date" value="${a.date}"></label><label class="f">عدد المستفيدين (المستهدف ${a.target})<input type="number" min="0" data-f="ben" data-n value="${a.ben}"></label><label class="f">متوسط الرضا من 5<input type="number" min="1" max="5" step="0.1" data-f="sat" value="${a.sat}"></label></div>
+  <div class="grid g3" style="margin-top:10px"><label class="f">تاريخ التنفيذ<input type="date" data-f="date" value="${a.date}"></label><label class="f">عدد المستفيدين (المستهدف ${a.target})<input type="number" min="0" data-f="ben" data-n value="${a.ben}"></label><label class="f">متوسط الرضا (من 5 أو نسبة %)<input type="number" min="0" max="100" step="0.1" data-f="sat" value="${a.sat}"></label></div>
   <div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap"><button class="btn sm ${a.done?'line':''}" data-done>${a.done?'إلغاء التنفيذ':'✓ تم التنفيذ'}</button><button class="btn light sm" data-up="a:${a.id}">📎 إرفاق دليل${evOf('a:'+a.id).length?' ('+evOf('a:'+a.id).length+')':''}</button></div>
   <div class="m" style="font-size:12px;color:var(--muted);margin-top:6px">الأدلة المطلوبة: إعلان · كشف حضور · صور · استبانة رضا · خطاب شكر</div></div>`).join('')}
  if(ROLE==='students'){const all=stuTasks();const dn=all.filter(t=>t.status==='done').length;
@@ -624,7 +624,7 @@ function renderAll(){const f=$('#allF')?.value||'';const T=S.tasks.filter(t=>!f|
  $('#v-all').innerHTML=`<h2>كل المهام حسب العضو</h2><div style="margin-bottom:10px"><select id="allF" style="border:1px solid var(--line);border-radius:8px;padding:7px"><option value="">كل الأعضاء</option>${Object.entries(ROLES).map(([k,r])=>`<option value="${k}" ${k===f?'selected':''}>${r.short}</option>`).join('')}</select></div>${T.map(t=>taskCard(t,false)).join('')}
  <h2>البحوث</h2>${S.research.map(r=>`<div class="card"><b>${esc(rLab(r))}: ${esc(rTit(r))}</b><div class="stations">${[1,2,3,4,5].map(i=>`<span class="${i<=r.station?'on':''}" style="${i<=r.station?'background:#2e7bd6':''}"></span>`).join('')}</div><div style="font-size:13px;color:var(--muted);margin-top:4px">المحطة ${r.station}/5 · ${r.team||'الفريق لم يُحدَّد'} · ${r.subNo?'رقم الإرسال '+esc(r.subNo):'لم يُرسل'} · ${r.decision}</div></div>`).join('')}
  <h2>الطلاب ومهامهم 🎓</h2>${S.students.map(st=>{const t=st.tasks||[];const d=stuDone(st);return `<div class="card"><b>${esc(st.name||'طالب/ة')}</b> <span style="color:var(--muted);font-size:13px">${esc(st.team)} · ${st.hours||0} ساعة</span><div class="bar"><i style="width:${t.length?d/t.length*100:0}%;background:#e0a100"></i></div><div style="font-size:13px;color:var(--muted);margin-top:4px">${d} من ${t.length} مهمة منجزة ${d?'⭐'.repeat(Math.min(d,5)):''}</div></div>`}).join('')||'<div class="card" style="color:var(--muted)">لم يُدمج تقرير «باحث المستقبل» بعد.</div>'}
- <h2>الأنشطة المجتمعية</h2>${S.acts.map(a=>`<div class="card"><b>${esc(a.name)}</b> <span class="tag ${a.done?'done':''}" style="${a.done?'':'background:#eef1f5'}">${a.done?'مُنفَّذ':'لم يُنفَّذ'}</span><div style="font-size:13px;color:var(--muted)">${esc(a.org)} · ${fd(a.date)} · ${a.ben||0} مستفيد${a.sat?' · رضا '+a.sat+'/5':''} · ${evOf('a:'+a.id).length} دليل</div></div>`).join('')}`}
+ <h2>الأنشطة المجتمعية</h2>${S.acts.map(a=>`<div class="card"><b>${esc(a.name)}</b> <span class="tag ${a.done?'done':''}" style="${a.done?'':'background:#eef1f5'}">${a.done?'مُنفَّذ':'لم يُنفَّذ'}</span><div style="font-size:13px;color:var(--muted)">${esc(a.org)} · ${fd(a.date)} · ${a.ben||0} مستفيد${a.sat?' · رضا '+(+a.sat<=5?a.sat+'/5':a.sat+'%'):''} · ${evOf('a:'+a.id).length} دليل</div></div>`).join('')}`}
 
 function displayData(){const done=[...S.tasks.filter(t=>t.status==='done').map(t=>({n:t.task,d:t.updated||t.due})),...S.acts.filter(a=>a.done).map(a=>({n:a.name+(a.ben?` (${a.ben} مستفيد)`:''),d:a.date})),...S.research.filter(r=>r.subNo).map(r=>({n:'إرسال '+rLab(r)+' لمجلة علمية',d:r.due}))].sort((a,b)=>a.d<b.d?1:-1);
  const next=[...S.tasks.filter(t=>t.status!=='done'&&t.due>=today()).map(t=>({n:t.task,d:t.due})),...S.acts.filter(a=>!a.done&&a.date>=today()).map(a=>({n:a.name,d:a.date}))].sort((a,b)=>a.d<b.d?-1:1);
