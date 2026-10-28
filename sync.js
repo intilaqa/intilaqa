@@ -120,6 +120,20 @@
     const d = it.data || {};
     return { id: 'app:' + it.id, sid: it.owner, fromApp: true, name: d.name || '', team: d.team || '', sem: d.sem || '', ava: d.ava || '', hours: (d.hours || []).reduce((p, x) => p + (+x.h || 0), 0), hoursLog: d.hours || [], tasks: (d.tasks || []).map(t => ({ id: t.id, task: t.task, due: t.due || '', status: t.status })), lastReport: (it.updated_at || '').slice(0, 7) };
   }
+  function confirm2(msg, ok) { return new Promise(res => { const m = document.createElement('div'); m.style.cssText = 'position:fixed;inset:0;background:rgba(20,30,50,.4);display:flex;align-items:center;justify-content:center;z-index:99;padding:16px'; m.innerHTML = `<div style="background:#fff;border-radius:16px;padding:18px;max-width:420px;width:100%;line-height:1.7"><b>${msg}</b><div style="display:flex;gap:8px;margin-top:14px;justify-content:flex-end"><button data-n class="btn l sm">إلغاء</button><button data-y class="btn sm" style="background:#c0392b;color:#fff;border:0">${ok}</button></div></div>`; document.body.appendChild(m); m.onclick = e => { if (e.target.closest('[data-y]')) { m.remove(); res(true) } else if (e.target.closest('[data-n]') || e.target === m) { m.remove(); res(false) } } }) }
+  let ARCH = {};
+  async function archiveYear(year, state) { await rest('POST', 'items', [{ id: 'archive-' + year, kind: 'archive', unit: 'chair', data: { year, date: new Date().toISOString().slice(0, 10), state } }], { Prefer: 'resolution=merge-duplicates,return=minimal' }) }
+  async function getArchive(id) { if (ARCH[id]) return ARCH[id]; const r = await rest('GET', 'items?select=data&id=eq.' + encodeURIComponent(id)); return r[0].data }
+  async function removeStudent(uid, quiet) {
+    try {
+      const list = await api('POST', '/storage/v1/object/list/evidence', { prefix: 'student/' + uid + '/', limit: 1000 });
+      const names = (list || []).map(f => 'student/' + uid + '/' + f.name);
+      if (names.length) await api('DELETE', '/storage/v1/object/evidence', { prefixes: names });
+    } catch (e) { }
+    await rest('POST', 'rpc/remove_student', { p_id: uid });
+    if (session && uid === session.user.id) { logout(true); location.replace(PAGES.student || 'student.html'); return }
+    if (!quiet) { await pull(); window.__rawRender && window.__rawRender(); if (document.getElementById('v-admin')) renderAdmin() }
+  }
   function applyItems(items) {
     ls.set(CACHE, items);
     if (PAGE === 'student') {
@@ -136,7 +150,8 @@
     S.students = by('students').concat(stuApp.map(studentEntry));
     S.evidence = by('evidence');
     stuApp.forEach(it => (it.data.evidence || []).forEach(ev => { if (ev.path) S.evidence.push({ id: ev.id, role: 'students', fromStudent: true, name: ev.name, size: ev.size, type: ev.type, link: 's:app:' + it.id, cat: 'دليل طالب', added: ev.added, path: ev.path }) }));
-    snapshot = {}; items.forEach(i => { if (i.kind !== 'student') snapshot[i.id] = JSON.stringify(i.data) });
+    ARCH = {}; S.archives = items.filter(i => i.kind === 'archive').map(i => { ARCH[i.id] = i.data; return { id: i.id, year: (i.data || {}).year, date: (i.data || {}).date } }).sort((a, b) => b.year - a.year);
+    snapshot = {}; items.forEach(i => { if (i.kind !== 'student' && i.kind !== 'archive') snapshot[i.id] = JSON.stringify(i.data) });
   }
   function currentRows() {
     if (PAGE === 'student') { const d = Object.assign({}, S); delete d.lastSent; return [{ id: 'student:' + session.user.id, kind: 'student', unit: 'student', data: d }] }
@@ -213,7 +228,8 @@
      <label class="f" id="adUnitL">القسم الذي يديره<select id="adUnit">${Object.entries(UNIT_AR).map(([k, v]) => `<option value="${k}">${v}</option>`).join('')}</select></label></div>
      <button class="btn" id="adAdd" style="margin-top:10px">إضافة</button> <span id="adMsg" style="font-size:13px"></span></div>
     <h2>من له صلاحية</h2><div class="card">${al.map(a => `<div class="mem"><span><b>${h(a.name || '—')}</b><br><span style="font-size:12px;color:var(--muted)" dir="ltr">${h(a.email)}</span><br><span class="tag" style="background:#eef3fa">${ROLE_AR[a.role]}${a.unit ? ' · ' + UNIT_AR[a.unit] : ''}</span> ${reg.has(a.email.toLowerCase()) ? '<span class="tag done">✓ سجّل</span>' : '<span class="tag" style="background:#fff6df;color:#8a5a00">لم يسجّل بعد</span>'}</span>${a.role === 'chair' && al.filter(x => x.role === 'chair').length < 2 ? '' : `<button class="btn red sm" data-adDel="${h(a.email)}">إزالة</button>`}</div>`).join('') || '—'}</div>
-    <h2>الطلاب المسجّلون (${studs.length})</h2><div class="card">${studs.map(s => `<div class="mem"><span>${h(s.name || '—')} <span style="font-size:12px;color:var(--muted)" dir="ltr">${h(s.email)}</span></span><span class="tag" style="background:#eaf6db;color:#3e6b00">طالب</span></div>`).join('') || '<div style="color:var(--muted)">لم يسجّل طلاب بعد. أرسلي لهم رابط student.html</div>'}</div>
+    <h2>الطلاب المسجّلون (${studs.length})</h2><div class="card">${studs.map(s => `<div class="mem"><span>${h(s.name || '—')} <span style="font-size:12px;color:var(--muted)" dir="ltr">${h(s.email)}</span></span><span style="display:flex;gap:6px;align-items:center"><span class="tag" style="background:#eaf6db;color:#3e6b00">طالب</span><button class="btn light sm" data-goStud>عرض</button><button class="btn red sm" data-rmstu="${h(s.id)}" data-nm="${h(s.name || '')}">حذف</button></span></div>`).join('') || '<div style="color:var(--muted)">لم يسجّل طلاب بعد. أرسلي لهم رابط student.html</div>'}</div>
+    ${window.newYearHTML ? newYearHTML() : ''}
     <div class="note">🔒 الصلاحيات يفرضها الخادم: كل عضو يرى ويعدّل قسمه فقط، ورئيس القسم يطّلع فقط، وأ. «باحث المستقبل» يرى بيانات الطلاب، والطالب يرى بياناته فقط.</div>`;
     const syncUnit = () => { el.querySelector('#adUnitL').style.display = el.querySelector('#adRole').value === 'member' ? '' : 'none' }; syncUnit();
     el.querySelector('#adRole').onchange = syncUnit;
@@ -222,13 +238,15 @@
       const msg = el.querySelector('#adMsg'); if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) { msg.style.color = 'var(--late)'; msg.textContent = 'اكتبي بريداً صحيحاً'; return }
       try { await rest('POST', 'allowlist', [{ email, name, role, unit }], { Prefer: 'resolution=merge-duplicates,return=minimal' }); toast && toast('✓ أُضيف ' + (name || email)); renderAdmin() } catch (e) { msg.style.color = 'var(--late)'; msg.textContent = 'تعذّرت الإضافة: ' + e.message }
     };
+    el.querySelectorAll('[data-goStud]').forEach(b => b.onclick = () => { const n = document.querySelector('#nav [data-v=stud]'); n && n.click(); scrollTo(0, 0) });
     el.querySelectorAll('[data-adDel]').forEach(b => b.onclick = async () => { if (!(await ask('إزالة صلاحية ' + b.dataset.addel + '؟', 'إزالة'))) return; try { await rest('DELETE', 'allowlist?email=eq.' + encodeURIComponent(b.dataset.addel)); renderAdmin() } catch (e) { toast && toast('تعذّرت الإزالة') } });
   }
 
   /* ---------- after each render: adapt the page to online mode ---------- */
   function afterRender() {
     if (PAGE === 'student') {
-      const s = document.getElementById('send'); if (s) { const card = s.closest('.card'); const h2 = card && card.previousElementSibling; if (h2) h2.textContent = '☁️ إنجازك يصل تلقائياً'; if (card) card.innerHTML = '<p style="margin:0">كل ما تسجّله يُحفظ ويصل لأ. عبدالعزيز ورئيسة اللجنة تلقائياً، ويظهر اسمك في «نجوم انطلاقة» على شاشات الكلية ⭐</p>' }
+      const s = document.getElementById('send'); if (s) { const card = s.closest('.card'); const h2 = card && card.previousElementSibling; if (h2) h2.textContent = '☁️ إنجازك يصل تلقائياً'; if (card) card.innerHTML = '<p style="margin:0">كل ما تسجّله يُحفظ ويصل لمشرف «باحث المستقبل» ورئيسة اللجنة تلقائياً، ويظهر اسمك في «نجوم انطلاقة» على شاشات الكلية ⭐</p><div style="margin-top:12px;border-top:1px dashed #e4eaf2;padding-top:10px;display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap"><span style="font-size:13px;color:#6b7a8c">تريد مغادرة البرنامج؟</span><button class="btn l sm" id="delMe" style="color:#c0392b">🗑️ حذف حسابي وبياناتي</button></div>';
+        const dm = document.getElementById('delMe'); if (dm) dm.onclick = async () => { if (!(await confirm2('حذف حسابك وكل مهامك وساعاتك وأدلتك نهائياً؟ لا يمكن التراجع.', 'حذف حسابي'))) return; try { await removeStudent(session.user.id) } catch (e) { (window.toast ? toast('تعذّر الحذف، تأكد من الاتصال بالإنترنت') : 0) } } }
       return;
     }
     const send = document.getElementById('v-send');
@@ -277,5 +295,5 @@
     const nv = document.getElementById('nav'); if (nv) nv.addEventListener('click', e => { if (e.target.closest('[data-v=admin]')) renderAdmin() });
   }
 
-  window.SYNC = { setName, boot, dirty, afterRender, fetchFile, renderAdmin, get profile() { return profile }, logout, _push: push, _pull: pull };
+  window.SYNC = { setName, removeStudent, archiveYear, getArchive, boot, dirty, afterRender, fetchFile, renderAdmin, get profile() { return profile }, logout, _push: push, _pull: pull };
 })();

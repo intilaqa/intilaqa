@@ -221,6 +221,15 @@ body{background:#f7f9fc}
 .rnote{font-size:11.5px;color:#5d6b7a;margin-top:18px;text-align:center}
 @media print{html,body{background:#fff!important}body.rep>*:not(#repOv){display:none!important}#repOv{position:static;background:#fff;padding:0;overflow:visible}.noprint{display:none!important}.rpaper{box-shadow:none;max-width:none;padding:0;border-radius:0}@page{size:A4;margin:14mm}}
 
+
+.sro .sh{display:flex;align-items:center;gap:10px}.sro .sav{font-size:26px;width:44px;height:44px;border-radius:14px;background:var(--accs);display:flex;align-items:center;justify-content:center;flex:none}
+.sro .si{flex:1;min-width:0}.sro .si b{display:block;color:#1c3768}.sro .si small{color:var(--muted);font-size:12.5px}
+.sro .sk{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end}.sro .sk span{font-size:12px;background:#f3f6fa;border-radius:99px;padding:2px 8px;white-space:nowrap}
+.sro details{margin-top:8px}.sro summary{cursor:pointer;color:var(--acc);font-size:13.5px;font-weight:700}
+.sg{margin-top:10px}.sg .gt{font-weight:800;color:#1c3768;font-size:13.5px;margin-bottom:4px}
+.srow{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:6px 0;border-bottom:1px dashed var(--line);font-size:14px}.srow:last-child{border:0}
+.mut{color:var(--muted);font-size:13px}.sa{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px}
+.ny ul{margin:6px 0;padding-inline-start:20px;font-size:14px;line-height:1.9}.arch{margin-top:14px;border-top:1px solid var(--line);padding-top:10px}
 /* ===== UI refresh ===== */
 :root{--bg:#f5f8fc;--line:#e7edf4;--sh:0 1px 2px rgba(28,55,104,.04),0 6px 18px rgba(28,55,104,.06)}
 html,body{background:var(--bg)}
@@ -277,7 +286,7 @@ details.rd summary::-webkit-details-marker{display:none}
 <section id="v-overview" class="hide"></section>
 <section id="v-receive" class="hide"></section><section id="v-admin" class="hide"></section>
 <section id="v-all" class="hide"></section>
-<section id="v-screen" class="hide"></section><section id="v-ideas" class="hide"></section>
+<section id="v-screen" class="hide"></section><section id="v-stud" class="hide"></section><section id="v-ideas" class="hide"></section>
 </main>
 <input type="file" id="fileIn" multiple class="hide"><input type="file" id="stuIn" multiple accept=".json" class="hide"><input type="file" id="impIn" multiple accept=".json" class="hide">
 <script>
@@ -308,6 +317,8 @@ const monthKey=()=>today().slice(0,7);
 const monthName=k=>{const[y,m]=k.split('-');return `${AR[+m-1]} ${y}`};
 const EV_CATS=['محضر اجتماع','قرار / خطاب رسمي','إعلان','كشف حضور','صور','استبانة رضا','خطاب شكر','اتفاقية شراكة','رقم إرسال / خطاب مجلة','شهادة','تقرير','أخرى'];
 
+function hijriNow(){try{return +new Intl.DateTimeFormat('en-u-ca-islamic-umalqura',{year:'numeric'}).format(new Date()).replace(/\D/g,'')||1448}catch(e){return 1448}}
+const YR=()=>(S&&S.kpi&&+S.kpi._year)||1448;
 function seed(){
  const T=(id,role,task,out,due)=>({id,role,task,out,due,status:'todo',note:'',updated:''});
  return {v:2,
@@ -376,13 +387,13 @@ const state=t=>t.status==='done'?'done':(t.due<today()?'late':t.status);
 const soon=t=>t.status!=='done'&&t.due>=today()&&t.due<=new Date(Date.now()+14*864e5).toISOString().slice(0,10);
 const evOf=link=>S.evidence.filter(e=>e.link===link);
 function headline(){
- const r=S.research,a=S.acts,done=a.filter(x=>x.done);const sats=done.map(x=>parseFloat(x.sat)).filter(x=>!isNaN(x));
+ const r=S.research,a=S.acts,done=a.filter(x=>x.done);const sats=done.map(x=>parseFloat(x.sat)).filter(x=>!isNaN(x)&&x>0).map(x=>x<=5?x/5*100:Math.min(x,100));
  return [
   {t:'أوراق بحثية مُرسلة',v:r.filter(x=>x.station>=5||x.subNo).length,goal:4},
   {t:'بحوث تجاوزت المسودة',v:r.filter(x=>x.station>=4).length,goal:4},
   {t:'أنشطة مجتمعية منفذة',v:done.length,goal:4},
   {t:'مستفيدون من المجتمع',v:a.reduce((p,c)=>p+(+c.ben||0),0),goal:100},
-  {t:'رضا المستفيدين',v:sats.length?Math.round(sats.reduce((p,c)=>p+c,0)/sats.length/5*100):0,goal:85,unit:'%'},
+  {t:'رضا المستفيدين',v:sats.length?Math.round(sats.reduce((p,c)=>p+c,0)/sats.length):0,goal:85,unit:'%'},
   {t:'طلاب مشاركون',v:S.students.length,goal:10},
  ];
 }
@@ -449,7 +460,7 @@ function kpiCardsHTML(){const C=['#2e7bd6','#00a3c4','#78b800','#e0a100','#8a6fd
 /* ---------- views ---------- */
 const VIEWS=DASH?[['overview','لوحة البيانات'],['ideas','💡 أفكار الفريق'],['screen','شاشة العرض'],['go:chair.html','✏️ صفحة العمل']]
  :ROLE==='chair'
- ?[['go:dashboard.html','📊 لوحة البيانات'],(window.SYNC?['admin','الأعضاء والصلاحيات']:['receive','استلام التقارير']),['mine','مهامي'],['all','كل المهام'],['ideas','💡 أفكار الفريق'],['evidence','الأدلة']]
+ ?[['go:dashboard.html','📊 لوحة البيانات'],(window.SYNC?['admin','الأعضاء والصلاحيات']:['receive','استلام التقارير']),['mine','مهامي'],['all','كل المهام'],['stud','🎓 الطلاب'],['ideas','💡 أفكار الفريق'],['evidence','الأدلة']]
  :[['mine','مهامي'],['extra',{research:'البحوث',clinic:'المشروعات',academy:'الدورات',students:'الطلاب',evidence:'المحاضر'}[ROLE]],['evidence','أدلتي'],['send','إرسال التقرير الشهري']];
 function nav(){const first=VIEWS.find(v=>!v[0].startsWith('go:'))[0]; $('#nav').innerHTML=VIEWS.map(([k,n])=>`<button data-v="${k}" class="${k===first?'on':''}${k.startsWith('go:')?' go':''}">${n}</button>`).join('');
  $$('main>section[id^=v-]').forEach(s=>s.classList.toggle('hide',s.id!=='v-'+first)); }
@@ -480,6 +491,38 @@ function printReport(title,inner){let o=document.getElementById('repOv');if(o)o.
  o.innerHTML=`<div class="rbar noprint"><button class="btn" id="repPrint">🖨️ طباعة / حفظ PDF</button><button class="btn rcl" id="repClose">إغلاق</button></div><div class="rpaper"><div class="rhd"><img src="${LOGO_PROG}" alt=""><img src="${LOGO_ACC}" class="c" alt=""><img src="${LOGO_COB}" alt=""></div><h1>${title}</h1><div class="rsub">برنامج «انطلاقة» · لجنة البحث العلمي وخدمة المجتمع · قسم نظم المعلومات الإدارية · كلية الأعمال · جامعة الباحة</div>${inner}</div>`;
  document.body.appendChild(o);document.body.classList.add('rep');o.querySelector('#repPrint').onclick=()=>window.print();o.querySelector('#repClose').onclick=()=>{o.remove();document.body.classList.remove('rep')}}
 const fdl=d=>{if(!d)return'—';const p=d.split('-');return p.length===3?`${+p[2]}/${+p[1]}/${p[0]}`:d};
+function stuCardRO(st){const tk=st.tasks||[];const d=stuDone(st);const ev=S.evidence.filter(e=>e.link==='s:'+st.id);const canDel=window.SYNC&&st.fromApp&&(ROLE==='chair'||ROLE==='students');
+ return `<div class="card sro" data-s="${st.id}"><div class="sh"><span class="sav">${st.ava||'🎓'}</span><div class="si"><b>${esc(st.name||'طالب/ة')}</b><small>${esc(st.team||'—')}${st.sem?' · الفصل '+esc(st.sem):''}</small></div><div class="sk"><span>✅ ${d}/${tk.length}</span><span>⏱️ ${+st.hours||0} س</span><span>📎 ${ev.length}</span></div></div>
+ <details><summary>عرض التفاصيل</summary>
+ <div class="sg"><div class="gt">🎯 المهام</div>${tk.map(t=>`<div class="srow"><span>${esc(t.task||'—')}</span><span class="tag ${t.status==='done'?'done':''}" style="${t.status==='doing'?'background:var(--doings);color:var(--doing)':t.status==='done'?'':'background:#eef1f5'}">${{todo:'لم يبدأ',doing:'جارٍ',done:'منجزة'}[t.status]||'—'}</span></div>`).join('')||'<div class="mut">لا مهام</div>'}</div>
+ <div class="sg"><div class="gt">⏱️ الساعات التطوعية</div>${(st.hoursLog||[]).filter(h=>(h.what||'').trim()||+h.h).map(h=>`<div class="srow"><span>${esc(h.what||'—')}${h.where?' · '+esc(h.where):''}</span><span class="mut">${fd(h.date)} · ${+h.h||0} س</span></div>`).join('')||'<div class="mut">'+(+st.hours||0)+' ساعة</div>'}</div>
+ <div class="sg"><div class="gt">📎 الأدلة</div>${ev.map(e=>`<div class="srow"><span>📄 ${esc(e.name)}</span><button class="btn light sm" data-open="${e.id}">فتح</button></div>`).join('')||'<div class="mut">لا أدلة بعد</div>'}</div></details>
+ <div class="sa"><button class="btn light sm" data-strep="${st.id}">📄 تقرير ساعاته</button>${canDel?`<button class="btn red sm" data-rmstu="${st.sid}" data-nm="${esc(st.name||'')}">🗑️ حذف الطالب</button>`:''}</div></div>`}
+function renderStud(){const el=$('#v-stud');if(!el)return;const L=S.students.slice().sort((a,b)=>stuDone(b)-stuDone(a)||(+b.hours||0)-(+a.hours||0));const H=L.reduce((p,c)=>p+(+c.hours||0),0);
+ el.innerHTML=`<div class="sec"><h2>🎓 طلاب «باحث المستقبل»</h2><p>${L.length} طالب/ة · ${H} ساعة تطوع</p></div><div style="margin-bottom:10px"><button class="btn sm" id="volAll">📄 تقرير الساعات التطوعية للطلاب</button></div>${L.map(stuCardRO).join('')||'<div class="card mut">لم يسجّل طلاب بعد. أرسلي لهم رابط صفحة الطلاب.</div>'}`}
+function stuReport(st){const T=(st.hoursLog||[]).filter(h=>(h.what||'').trim()||+h.h).slice().sort((a,b)=>(a.date||'')<(b.date||'')?-1:1);const H=+st.hours||0;
+ printReport('تقرير الساعات التطوعية',`<table class="ri"><tr><td>اسم الطالب/ة</td><td>${esc(st.name||'')}</td></tr><tr><td>الفريق</td><td>${esc(st.team||'—')}</td></tr><tr><td>الفصل الدراسي</td><td>${esc(st.sem||'—')} · ${YR()}هـ</td></tr><tr><td>تاريخ التقرير</td><td>${fdl(today())}</td></tr></table>
+ <h3>الأنشطة التطوعية</h3><table><tr><th>م</th><th>النشاط</th><th>الجهة المستفيدة</th><th>التاريخ</th><th>الساعات</th></tr>${T.map((h,i)=>`<tr><td>${i+1}</td><td class="tl">${esc(h.what||'—')}</td><td>${esc(h.where||'—')}</td><td>${fdl(h.date)}</td><td>${+h.h||0}</td></tr>`).join('')||'<tr><td colspan="5">لا توجد تفاصيل مسجّلة</td></tr>'}</table>
+ <div class="rtot"><div><b>${H}</b><span>إجمالي الساعات</span></div><div><b>${Math.round(H*3)}</b><span>النقاط التطوعية</span></div></div>
+ <div class="rsig"><div><b>مشرف «باحث المستقبل»</b><br>الاسم: ${esc(nm('students'))}<br>التوقيع: ..............................</div><div><b>اعتماد رئيسة اللجنة</b><br>الاسم: ${esc(nm('chair'))}<br>التوقيع: ..............................</div></div><div class="rnote">صادر من تطبيق «انطلاقة»</div>`)}
+function newYearHTML(){const y=YR();const A=(S.archives||[]);return `<h2>🗓️ بداية سنة جديدة</h2><div class="card ny"><p style="margin-top:0">السنة الحالية في التطبيق: <b>${y}هـ</b>. عند بداية سنة جديدة يحفظ التطبيق نسخة كاملة من هذه السنة، ثم يجهّز صفحة نظيفة للسنة الجديدة:</p>
+ <ul><li>المهام ترجع «لم أبدأ» وتنتقل مواعيدها سنة كاملة.</li><li>البحوث تبدأ من جديد: العناوين والفرق والاتفاقيات والأخلاقيات.</li><li>المشروعات والدورات ترجع «لم يُنفَّذ»، وقيم المؤشرات الحالية تصير «العام الماضي».</li><li>قائمة الأدلة تُفرَّغ، وتبقى محفوظة في نسخة السنة.</li><li>الأعضاء وصلاحياتهم والأفكار والشراكات تبقى كما هي.</li></ul>
+ <label style="display:flex;gap:8px;align-items:center;margin:8px 0"><input type="checkbox" id="nyStu" ${window.SYNC?'':'disabled'}> حذف حسابات الطلاب أيضاً (لدفعة جديدة)</label>
+ <button class="btn" id="nyGo">🗓️ بدء سنة ${y+1}هـ</button>
+ ${A.length?`<div class="arch"><b>📚 أرشيف السنوات</b>${A.map(a=>`<div class="srow"><span>سنة ${a.year}هـ · حُفظت ${fd(a.date)}</span><button class="btn light sm" data-arch="${a.id}">⬇️ تنزيل</button></div>`).join('')}</div>`:''}</div>`}
+async function startNewYear(){const y=YR();if(!(await ask(`بدء سنة ${y+1}هـ؟ سيُحفظ أرشيف كامل لسنة ${y}هـ أولاً، ثم تُجهَّز صفحة جديدة.`,'نعم، ابدئي')))return;
+ const delStu=$('#nyStu')&&$('#nyStu').checked;const snap=JSON.parse(JSON.stringify(S));delete snap.archives;
+ try{download(`انطلاقة_أرشيف_سنة_${y}.json`,JSON.stringify({app:'intilaqa-archive',year:y,date:today(),state:snap}),'application/json')}catch(e){}
+ if(window.SYNC&&SYNC.archiveYear){try{await SYNC.archiveYear(y,snap)}catch(e){toast('تعذّر حفظ الأرشيف على الخادم — لم يتغير شيء');return}}
+ const sh=d=>{if(!d)return d;const p=d.split('-');return p.length===3?(+p[0]+1)+'-'+p[1]+'-'+p[2]:d};
+ S.tasks.forEach(t=>{t.status='todo';t.note='';t.updated='';t.due=sh(t.due)});
+ S.research.forEach(r=>{Object.assign(r,{title:'',team:'',mem:[],members:'',journal:'',station:1,subNo:'',decision:'—',ethics:'لم يُطلب بعد',due:sh(r.due)})});
+ S.acts.forEach(a=>{a.done=false;a.ben=0;a.sat='';a.date=sh(a.date)});
+ S.students=S.students.filter(x=>x.fromApp);S.evidence=S.evidence.filter(x=>x.fromStudent&&!delStu);
+ S.kpi=S.kpi||{};Object.keys(S.kpi).forEach(k=>{const v=S.kpi[k];if(v&&typeof v==='object'){v.base=v.cur??v.base;v.cur=''}});S.kpi._year=y+1;S.lastSent='';
+ save();
+ if(delStu&&window.SYNC){for(const st of S.students.filter(x=>x.fromApp)){try{await SYNC.removeStudent(st.sid,true)}catch(e){}}}
+ confetti(200);toast(`🎉 أهلاً بسنة ${y+1}هـ! بداية جديدة جميلة 🌷`)}
 const agrOf=r=>evOf('ag:'+r.id),etOf=r=>evOf('et:'+r.id),ETH=['لم يُطلب بعد','قيد المراجعة','معتمدة','لا يحتاج (بيانات منشورة)'],ethOk=r=>/معتمدة|لا يحتاج/.test(r.ethics||'');
 function ethBox(r){const ok=ethOk(r),n=etOf(r).length;return `<div class="agr ${ok?'ok':''}"><div><b>🛡️ موافقة لجنة أخلاقيات البحث</b><span>${ok?'✅ جاهزون لجمع البيانات':'مطلوبة قبل جمع أي بيانات من أشخاص (استبانة، مقابلة…)'}</span></div><div class="ab"><select data-f="ethics" class="es">${ETH.map(x=>`<option ${x===(r.ethics||ETH[0])?'selected':''}>${x}</option>`).join('')}</select><button class="btn sm" data-up="et:${r.id}">${n?'📎 تحديث ('+n+')':'📤 رفع الموافقة'}</button></div></div>`}
 function agrBox(r){const n=agrOf(r).length;return `<div class="agr ${n?'ok':''}"><div><b>📝 اتفاقية الفريق</b><span>${n?'✅ مرفوعة — شكرًا لكم 🌷':'موقّعة من الباحث الأول مع الأعضاء'}</span></div><div class="ab"><a class="btn light sm" href="agreement.docx" download="اتفاقية_فريق_بحثي.docx">⬇️ النموذج</a><button class="btn sm" data-up="ag:${r.id}">${n?'📎 تحديث':'📤 رفع الاتفاقية الموقّعة'}</button></div></div>`}
@@ -493,13 +536,13 @@ function renderExtra(){let h='';
   <label class="f">رقم الإرسال<input data-f="subNo" value="${esc(r.subNo)}" dir="ltr"></label><label class="f">قرار المجلة<select data-f="decision">${['—','قيد التحكيم','تعديلات','مقبول','مرفوض'].map(x=>`<option ${x===r.decision?'selected':''}>${x}</option>`).join('')}</select></label></div></div>
   <button class="btn light sm" data-up="r:${r.id}">📎 إرفاق دليل آخر${ev?' ('+ev+')':''}</button></div></details>`}).join('')}
  if(ROLE==='clinic'||ROLE==='academy'){h=`<h2>${ROLE==='clinic'?'مشروعات العيادة الرقمية':'دورات أكاديمية المهارات'}</h2>`+mine(S.acts).map(a=>`<div class="card" data-a="${a.id}"><div style="font-weight:700">${esc(a.name)} <span class="tag ${a.done?'done':''}" style="${a.done?'':'background:#eef1f5'}">${a.done?'مُنفَّذ':'لم يُنفَّذ بعد'}</span></div><div class="m" style="font-size:13px;color:var(--muted)">${esc(a.org)}</div>
-  <div class="grid g3" style="margin-top:10px"><label class="f">تاريخ التنفيذ<input type="date" data-f="date" value="${a.date}"></label><label class="f">عدد المستفيدين (المستهدف ${a.target})<input type="number" min="0" data-f="ben" data-n value="${a.ben}"></label><label class="f">متوسط الرضا من 5<input type="number" min="1" max="5" step="0.1" data-f="sat" value="${a.sat}"></label></div>
+  <div class="grid g3" style="margin-top:10px"><label class="f">تاريخ التنفيذ<input type="date" data-f="date" value="${a.date}"></label><label class="f">عدد المستفيدين (المستهدف ${a.target})<input type="number" min="0" data-f="ben" data-n value="${a.ben}"></label><label class="f">متوسط الرضا (من 5 أو نسبة %)<input type="number" min="0" max="100" step="0.1" data-f="sat" value="${a.sat}"></label></div>
   <div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap"><button class="btn sm ${a.done?'line':''}" data-done>${a.done?'إلغاء التنفيذ':'✓ تم التنفيذ'}</button><button class="btn light sm" data-up="a:${a.id}">📎 إرفاق دليل${evOf('a:'+a.id).length?' ('+evOf('a:'+a.id).length+')':''}</button></div>
   <div class="m" style="font-size:12px;color:var(--muted);margin-top:6px">الأدلة المطلوبة: إعلان · كشف حضور · صور · استبانة رضا · خطاب شكر</div></div>`).join('')}
  if(ROLE==='students'){const all=stuTasks();const dn=all.filter(t=>t.status==='done').length;
   h=`<div class="card" style="background:var(--accs);border-color:transparent"><b>📥 تقارير الطلاب</b><div style="font-size:14px;color:var(--muted);margin:4px 0 10px">كل طالب يستخدم صفحة «انطلاقة للطلاب» ويرسل لك ملفه آخر الشهر. اختر الملفات هنا فتُضاف أسماؤهم ومهامهم وساعاتهم وأدلتهم تلقائياً.</div><button class="btn" id="stuImp">📥 استلام ملفات الطلاب</button><div id="stuLog"></div></div>
   <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap"><h2>طلاب «باحث المستقبل» ومهامهم 🎓</h2><button class="btn sm" id="volAll">📄 تقرير الساعات التطوعية للطلاب</button></div><div class="sum" style="margin-bottom:12px"><div class="s"><b>${S.students.length} / 10</b><span>طلاب مشاركون</span><div class="bar"><i style="width:${Math.min(100,S.students.length*10)}%"></i></div></div><div class="s"><b>${dn} / ${all.length}</b><span>مهام طلابية منجزة</span><div class="bar"><i style="width:${all.length?dn/all.length*100:0}%"></i></div></div><div class="s"><b>${S.students.reduce((p,c)=>p+(+c.hours||0),0)}</b><span>ساعة تطوع</span></div><div class="s"><b>${(S.students.slice().sort((x,y)=>stuDone(y)-stuDone(x)||(y.hours||0)-(x.hours||0))[0]||{}).name||'—'}</b><span>⭐ نجم الشهر</span></div></div>`
-  +(S.students.map(st=>{const tk=st.tasks||[];const d=stuDone(st);return `<div class="card stu" data-s="${st.id}"><div class="head"><label class="f">${st.ava?st.ava+' ':''}اسم الطالب/ة${st.lastReport?` <span class="tag done">تقرير ${monthName(st.lastReport).split(' ')[0]}</span>`:''}<input data-f="name" value="${esc(st.name)}"></label><label class="f">الفريق أو المشروع<input data-f="team" value="${esc(st.team)}"></label><label class="f">الفصل<select data-f="sem"><option ${st.sem==='الأول'?'selected':''}>الأول</option><option ${st.sem==='الثاني'?'selected':''}>الثاني</option></select></label><label class="f">ساعات التطوع<input type="number" min="0" data-f="hours" data-n value="${st.hours||0}"></label><button class="btn red sm" data-delstu>✕</button></div>
+  +(S.students.map(st=>{if(st.fromApp)return stuCardRO(st);const tk=st.tasks||[];const d=stuDone(st);return `<div class="card stu" data-s="${st.id}"><div class="head"><label class="f">${st.ava?st.ava+' ':''}اسم الطالب/ة${st.lastReport?` <span class="tag done">تقرير ${monthName(st.lastReport).split(' ')[0]}</span>`:''}<input data-f="name" value="${esc(st.name)}"></label><label class="f">الفريق أو المشروع<input data-f="team" value="${esc(st.team)}"></label><label class="f">الفصل<select data-f="sem"><option ${st.sem==='الأول'?'selected':''}>الأول</option><option ${st.sem==='الثاني'?'selected':''}>الثاني</option></select></label><label class="f">ساعات التطوع<input type="number" min="0" data-f="hours" data-n value="${st.hours||0}"></label><button class="btn red sm" data-delstu>✕</button></div>
    <div style="margin:10px 0 4px;font-weight:700;color:var(--navy)">مهام الطالب ${d?`<span class="badge">${d>=4?'🏆':'⭐'.repeat(Math.min(d,3))} ${d} منجزة</span>`:''}</div>
    ${tk.map(t=>`<div class="stt" data-stt="${t.id}"><input data-stf="task" value="${esc(t.task)}" placeholder="وصف المهمة"><input type="date" data-stf="due" value="${t.due}"><div class="seg" data-stseg>${[['todo','لم يبدأ'],['doing','جارٍ'],['done','منجز']].map(([k,n])=>`<button data-k="${k}" class="${t.status===k?'on':''}">${n}</button>`).join('')}</div><button class="btn red sm" data-delstt>✕</button></div>`).join('')||'<div style="color:var(--muted);font-size:14px">لا مهام بعد — أضف مهمة أو اختر المهام الجاهزة ⚡</div>'}
    <div style="margin-top:8px;display:flex;gap:8px;flex-wrap:wrap"><button class="btn light sm" data-addst>+ مهمة</button><button class="btn line sm" data-tplst>⚡ مهام جاهزة</button></div></div>`}).join('')||'<div class="card" style="color:var(--muted)">لم يُضف طلاب بعد… الفريق ينتظر أبطاله 🦸</div>')
@@ -539,7 +582,7 @@ function renderOverview(){const H=headline();const T=S.tasks;const done=T.filter
  <h2>الشراكات</h2><div class="card">${S.partners.map(p=>`<div class="mem" data-p="${p.id}"><input data-pf="name" value="${esc(p.name)}" placeholder="اسم الجهة" style="flex:1;border:1px solid var(--line);border-radius:8px;padding:6px;margin-inline-end:8px"><label style="font-size:14px;white-space:nowrap"><input type="checkbox" data-pf="signed" ${p.signed?'checked':''}> موقّعة</label> <button class="btn red sm" data-delp style="margin-inline-start:8px">✕</button></div>`).join('')}<button class="btn light sm" id="addP" style="margin-top:8px">+ إضافة جهة</button></div>
  <h2>نسخة احتياطية</h2><div class="card"><button class="btn line" id="bk">💾 حفظ نسخة احتياطية كاملة</button> <button class="btn line" id="rs">📂 استعادة نسخة</button> <button class="btn line" id="csv">📊 تصدير Excel (CSV)</button></div>`}
 
-function renderReceive(){$('#v-receive').innerHTML=`<h2>استلام التقارير الشهرية ودمجها</h2><div class="card"><p style="margin-top:0">اختاري ملفات التقارير التي وصلتك من الأعضاء (يمكن اختيار عدة ملفات معاً). يُدمج كل تقرير في مهام صاحبه فقط، ولا يمسّ مهام غيره.</p><button class="btn big" id="impBtn">📥 اختيار ملفات التقارير</button><div id="impLog"></div></div>
+function renderReceive(){if(window.SYNC)return;$('#v-receive').innerHTML=newYearHTML()+`<h2>استلام التقارير الشهرية ودمجها</h2><div class="card"><p style="margin-top:0">اختاري ملفات التقارير التي وصلتك من الأعضاء (يمكن اختيار عدة ملفات معاً). يُدمج كل تقرير في مهام صاحبه فقط، ولا يمسّ مهام غيره.</p><button class="btn big" id="impBtn">📥 اختيار ملفات التقارير</button><div id="impLog"></div></div>
  <h2>سجل الاستلام</h2><div class="card" style="overflow:auto"><table><thead><tr><th>العضو</th>${months().map(m=>`<th style="text-align:center">${monthName(m).split(' ')[0]}</th>`).join('')}</tr></thead><tbody>${Object.entries(ROLES).filter(([k])=>k!=='chair').map(([k,r])=>`<tr><td><span class="dot" style="background:${r.color}"></span>${r.short}</td>${months().map(m=>`<td style="text-align:center">${(S.received[k]||{})[m]?'✅':'—'}</td>`).join('')}</tr>`).join('')}</tbody></table></div>`;
  $('#impBtn').onclick=()=>$('#impIn').click()}
 const months=()=>['2026-10','2026-11','2026-12','2027-01','2027-02','2027-03','2027-04','2027-05'];
@@ -558,7 +601,7 @@ function renderAll(){const f=$('#allF')?.value||'';const T=S.tasks.filter(t=>!f|
  $('#v-all').innerHTML=`<h2>كل المهام حسب العضو</h2><div style="margin-bottom:10px"><select id="allF" style="border:1px solid var(--line);border-radius:8px;padding:7px"><option value="">كل الأعضاء</option>${Object.entries(ROLES).map(([k,r])=>`<option value="${k}" ${k===f?'selected':''}>${r.short}</option>`).join('')}</select></div>${T.map(t=>taskCard(t,false)).join('')}
  <h2>البحوث</h2>${S.research.map(r=>`<div class="card"><b>${esc(rLab(r))}: ${esc(rTit(r))}</b><div class="stations">${[1,2,3,4,5].map(i=>`<span class="${i<=r.station?'on':''}" style="${i<=r.station?'background:#2e7bd6':''}"></span>`).join('')}</div><div style="font-size:13px;color:var(--muted);margin-top:4px">المحطة ${r.station}/5 · ${r.team||'الفريق لم يُحدَّد'} · ${r.subNo?'رقم الإرسال '+esc(r.subNo):'لم يُرسل'} · ${r.decision}</div></div>`).join('')}
  <h2>الطلاب ومهامهم 🎓</h2>${S.students.map(st=>{const t=st.tasks||[];const d=stuDone(st);return `<div class="card"><b>${esc(st.name||'طالب/ة')}</b> <span style="color:var(--muted);font-size:13px">${esc(st.team)} · ${st.hours||0} ساعة</span><div class="bar"><i style="width:${t.length?d/t.length*100:0}%;background:#e0a100"></i></div><div style="font-size:13px;color:var(--muted);margin-top:4px">${d} من ${t.length} مهمة منجزة ${d?'⭐'.repeat(Math.min(d,5)):''}</div></div>`}).join('')||'<div class="card" style="color:var(--muted)">لم يُدمج تقرير «باحث المستقبل» بعد.</div>'}
- <h2>الأنشطة المجتمعية</h2>${S.acts.map(a=>`<div class="card"><b>${esc(a.name)}</b> <span class="tag ${a.done?'done':''}" style="${a.done?'':'background:#eef1f5'}">${a.done?'مُنفَّذ':'لم يُنفَّذ'}</span><div style="font-size:13px;color:var(--muted)">${esc(a.org)} · ${fd(a.date)} · ${a.ben||0} مستفيد${a.sat?' · رضا '+a.sat+'/5':''} · ${evOf('a:'+a.id).length} دليل</div></div>`).join('')}`}
+ <h2>الأنشطة المجتمعية</h2>${S.acts.map(a=>`<div class="card"><b>${esc(a.name)}</b> <span class="tag ${a.done?'done':''}" style="${a.done?'':'background:#eef1f5'}">${a.done?'مُنفَّذ':'لم يُنفَّذ'}</span><div style="font-size:13px;color:var(--muted)">${esc(a.org)} · ${fd(a.date)} · ${a.ben||0} مستفيد${a.sat?' · رضا '+(+a.sat<=5?a.sat+'/5':a.sat+'%'):''} · ${evOf('a:'+a.id).length} دليل</div></div>`).join('')}`}
 
 function displayData(){const done=[...S.tasks.filter(t=>t.status==='done').map(t=>({n:t.task,d:t.updated||t.due})),...S.acts.filter(a=>a.done).map(a=>({n:a.name+(a.ben?` (${a.ben} مستفيد)`:''),d:a.date})),...S.research.filter(r=>r.subNo).map(r=>({n:'إرسال '+rLab(r)+' لمجلة علمية',d:r.due}))].sort((a,b)=>a.d<b.d?1:-1);
  const next=[...S.tasks.filter(t=>t.status!=='done'&&t.due>=today()).map(t=>({n:t.task,d:t.due})),...S.acts.filter(a=>!a.done&&a.date>=today()).map(a=>({n:a.name,d:a.date}))].sort((a,b)=>a.d<b.d?-1:1);
@@ -581,7 +624,7 @@ function renderScreen(){$('#v-screen').innerHTML=`<h2>شاشة العرض للو
 
 /* ---------- render & events ---------- */
 function render(){__render0();window.SYNC&&SYNC.afterRender()}
-function __render0(){window.__who&&__who();renderIdeas();const v=$('#nav button.on')?.dataset.v;renderMine();if(ROLE==='chair'){renderOverview();renderReceive();renderAll();if(v==='screen'||!$('#prevF'))renderScreen()}else{renderExtra();renderSend()}renderEvidence()}
+function __render0(){window.__who&&__who();renderIdeas();const v=$('#nav button.on')?.dataset.v;renderMine();if(ROLE==='chair'){renderStud();renderOverview();renderReceive();renderAll();if(v==='screen'||!$('#prevF'))renderScreen()}else{renderExtra();renderSend()}renderEvidence()}
 document.addEventListener('click',async e=>{
  if(e.target.id==='editName'){const cur=(S.names||{})[ROLE]||'';const m=document.createElement('div');m.className='modal';m.innerHTML=`<div class="mbox"><b>اكتب اسمك كما تريده أن يظهر</b><input id="nmIn" value="${esc(cur)}" placeholder="مثال: د. فلان الفلاني" style="display:block;width:100%;box-sizing:border-box;margin:12px 0;border:1px solid var(--line);border-radius:10px;padding:10px"><div style="display:flex;gap:8px"><button class="btn" data-y>حفظ</button><button class="btn line" data-n>إلغاء</button></div></div>`;document.body.appendChild(m);m.querySelector('#nmIn').focus();
   m.onclick=ev=>{if(ev.target.closest('[data-y]')){const v=m.querySelector('#nmIn').value.trim();if(v){S.names=S.names||{};S.names[ROLE]=v;window.SYNC&&SYNC.setName&&SYNC.setName(v);save();toast('👋 أهلاً '+v)}m.remove()}else if(ev.target.closest('[data-n]')||ev.target===m)m.remove()};return}
@@ -596,6 +639,10 @@ document.addEventListener('click',async e=>{
   ${L.filter(x=>(x.hoursLog||[]).length).map(x=>`<h3>${esc(x.name)}</h3><table><tr><th>النشاط</th><th>الجهة</th><th>التاريخ</th><th>الساعات</th></tr>${x.hoursLog.filter(h=>(h.what||'').trim()||+h.h).map(h=>`<tr><td class="tl">${esc(h.what||'—')}</td><td>${esc(h.where||'—')}</td><td>${fdl(h.date)}</td><td>${+h.h||0}</td></tr>`).join('')}</table>`).join('')}
   <div class="rsig"><div><b>مشرف «باحث المستقبل»</b><br>الاسم: ${esc(nm('students'))}<br>التوقيع: ..............................</div><div><b>اعتماد رئيسة اللجنة</b><br>الاسم: ${esc(nm('chair'))}<br>التوقيع: ..............................</div></div>
   <div class="rnote">صادر من تطبيق «انطلاقة» · النقاط التطوعية = 3 نقاط لكل ساعة</div>`);return}
+ const sr=e.target.closest('[data-strep]');if(sr){const st=S.students.find(x=>x.id===sr.dataset.strep);if(st)stuReport(st);return}
+ const rm=e.target.closest('[data-rmstu]');if(rm){if(!(await ask(`حذف الطالب/ة «${rm.dataset.nm||''}» وكل بياناته وأدلته نهائياً؟`,'حذف')))return;try{await SYNC.removeStudent(rm.dataset.rmstu);toast('🗑️ حُذف الطالب')}catch(err){toast('تعذّر الحذف: '+(err.message||''))}return}
+ if(e.target.id==='nyGo'){startNewYear();return}
+ const ar=e.target.closest('[data-arch]');if(ar){try{const d=await SYNC.getArchive(ar.dataset.arch);download(`انطلاقة_أرشيف_سنة_${d.year}.json`,JSON.stringify({app:'intilaqa-archive',year:d.year,date:d.date,state:d.state}),'application/json')}catch(err){toast('تعذّر التنزيل')}return}
  const ma=e.target.closest('[data-madd],[data-mdel]');if(ma){const r=S.research.find(x=>x.id===ma.closest('[data-r]').dataset.r);const L=mArr(r).slice();if(ma.dataset.madd!==undefined){if(L.length<MAXM)L.push('')}else L.splice(+ma.dataset.mdel,1);r.mem=L;save();if(ma.dataset.madd!==undefined)setTimeout(()=>{const ins=document.querySelectorAll(`[data-r="${r.id}"] [data-mi]`);ins.length&&ins[ins.length-1].focus()},50);return}
  const mv=e.target.closest('[data-mv]');if(mv){const r=S.research.find(x=>x.id===mv.closest('[data-race]').dataset.race);const ns=Math.max(1,Math.min(5,r.station+(+mv.dataset.mv)));if(ns!==r.station){const up=ns>r.station;r.station=ns;save();if(up&&ns===2&&!ethOk(r)){toast('🛡️ تذكير لطيف: قبل جمع البيانات تأكدوا من موافقة لجنة الأخلاقيات وارفعوها من «البحوث» 🌷');return}if(up){if(ns===5){confetti(220);toast('📮 وصل البحث للمجلة! خطوة تاريخية 🎉')}else{confetti(70);toast(`${STN[ns-1][0]} وصلتم محطة «${STN[ns-1][1]}»… أحسنتم 🌷`)}}}return}
  const sst=e.target.closest('[data-stseg] button');if(sst){const sid=sst.closest('[data-s]').dataset.s,tid=sst.closest('[data-stt]').dataset.stt;const st=S.students.find(x=>x.id===sid);const tk=st.tasks.find(x=>x.id===tid);const was=tk.status;tk.status=sst.dataset.k;save();if(tk.status==='done'&&was!=='done'){confetti(90);toast(`👏 ${st.name||'الطالب'} أنجز مهمة! نجم في الطريق ⭐`)}return}
@@ -643,7 +690,7 @@ $('#stuIn').onchange=async e=>{const log=[];for(const f of e.target.files){try{c
 
 /* ---------- init ---------- */
 $('#lP').src=LOGO_PROG;$('#lA').src=LOGO_ACC;$('#lC').src=LOGO_COB;
-const R=ROLES[ROLE];$('#whoTitle').textContent=R.title+' · انطلاقة 1448هـ';window.__who=()=>{const n=nm(ROLE);$('#whoName').innerHTML=esc(n)+' <button id="editName" class="btn light sm" style="vertical-align:middle" aria-label="تعديل الاسم">✏️ اسمي</button>';$('#av').textContent=(n.replace(/^(أ|د|م)\.\s*/,'').charAt(0))||'؟'};
+const R=ROLES[ROLE];$('#whoTitle').textContent=R.title+' · انطلاقة '+YR()+'هـ';window.__who=()=>{const n=nm(ROLE);$('#whoName').innerHTML=esc(n)+' <button id="editName" class="btn light sm" style="vertical-align:middle" aria-label="تعديل الاسم">✏️ اسمي</button>';$('#av').textContent=(n.replace(/^(أ|د|م)\.\s*/,'').charAt(0))||'؟'};
 
 window.__init=()=>{try{load();nav();render()}catch(e){window.__showErr&&window.__showErr(e)}
 openDB().then(()=>{try{if(!canStore)$('#storeWarn').classList.remove('hide');render()}catch(e){window.__showErr&&window.__showErr(e)}});};window.__rawRender=()=>render();if(window.SYNC)SYNC.boot();else __init();
