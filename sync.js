@@ -253,6 +253,12 @@
       const msg = el.querySelector('#adMsg'); if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) { msg.style.color = 'var(--late)'; msg.textContent = 'اكتبي بريداً صحيحاً'; return }
       try { await rest('POST', 'allowlist', [{ email, name, role, unit }], { Prefer: 'resolution=merge-duplicates,return=minimal' }); toast && toast('✓ أُضيف ' + (name || email)); renderAdmin() } catch (e) { msg.style.color = 'var(--late)'; msg.textContent = 'تعذّرت الإضافة: ' + e.message }
     };
+    el.querySelectorAll('[data-rmstu]').forEach(b => b.onclick = async () => {
+      if (!(await confirm2('حذف الطالب/ة «' + (b.dataset.nm || '') + '» وكل مهامه وساعاته وأدلته نهائياً؟ لا يمكن التراجع.', 'حذف'))) return;
+      b.disabled = true; b.textContent = '…';
+      try { await removeStudent(b.dataset.rmstu); toast && toast('🗑️ حُذف الطالب') }
+      catch (e) { b.disabled = false; b.textContent = 'حذف'; toast && toast('تعذّر الحذف: ' + (/غير مسموح|ليس حساب طالب/.test(e.message) ? (e.message.match(/غير مسموح|هذا الحساب ليس حساب طالب/) || [''])[0] : 'تأكدي من الاتصال، ومن تشغيل ملف إعداد قاعدة البيانات')) }
+    });
     el.querySelectorAll('[data-goStud]').forEach(b => b.onclick = () => { const n = document.querySelector('#nav [data-v=stud]'); n && n.click(); scrollTo(0, 0) });
     el.querySelectorAll('[data-adDel]').forEach(b => b.onclick = async () => { if (!(await ask('إزالة صلاحية ' + b.dataset.addel + '؟', 'إزالة'))) return; try { await rest('DELETE', 'allowlist?email=eq.' + encodeURIComponent(b.dataset.addel)); renderAdmin() } catch (e) { toast && toast('تعذّرت الإزالة') } });
   }
