@@ -243,7 +243,7 @@
      <label class="f" id="adUnitL">القسم الذي يديره<select id="adUnit">${Object.entries(UNIT_AR).map(([k, v]) => `<option value="${k}">${v}</option>`).join('')}</select></label></div>
      <button class="btn" id="adAdd" style="margin-top:10px">إضافة</button> <span id="adMsg" style="font-size:13px"></span></div>
     <h2>من له صلاحية</h2><div class="card">${al.map(a => `<div class="mem"><span><b>${h(a.name || '—')}</b><br><span style="font-size:12px;color:var(--muted)" dir="ltr">${h(a.email)}</span><br><span class="tag" style="background:#eef3fa">${ROLE_AR[a.role]}${a.unit ? ' · ' + UNIT_AR[a.unit] : ''}</span> ${reg.has(a.email.toLowerCase()) ? '<span class="tag done">✓ سجّل</span>' : '<span class="tag" style="background:#fff6df;color:#8a5a00">لم يسجّل بعد</span>'}</span>${a.role === 'chair' && al.filter(x => x.role === 'chair').length < 2 ? '' : `<button class="btn red sm" data-adDel="${h(a.email)}">إزالة</button>`}</div>`).join('') || '—'}</div>
-    <h2>الطلاب المسجّلون (${studs.length})</h2><div class="card">${studs.map(s => `<div class="mem"><span>${h(s.name || '—')} <span style="font-size:12px;color:var(--muted)" dir="ltr">${h(s.email)}</span></span><span style="display:flex;gap:6px;align-items:center"><span class="tag" style="background:#eaf6db;color:#3e6b00">طالب</span><button class="btn light sm" data-goStud>عرض</button><button class="btn red sm" data-rmstu="${h(s.id)}" data-nm="${h(s.name || '')}">حذف</button></span></div>`).join('') || '<div style="color:var(--muted)">لم يسجّل طلاب بعد. أرسلي لهم رابط student.html</div>'}</div>
+    <h2>الطلاب المسجّلون (${studs.length})</h2><div class="card">${studs.map(s => `<div class="mem"><span>${h(s.name || '—')} <span style="font-size:12px;color:var(--muted)" dir="ltr">${h(s.email)}</span></span><span style="display:flex;gap:6px;align-items:center"><span class="tag" style="background:#eaf6db;color:#3e6b00">طالب</span><button class="btn light sm" data-goStud="${h(s.id)}" data-nm="${h(s.name || '')}">عرض</button><button class="btn red sm" data-rmstu="${h(s.id)}" data-nm="${h(s.name || '')}">حذف</button></span></div>`).join('') || '<div style="color:var(--muted)">لم يسجّل طلاب بعد. أرسلي لهم رابط student.html</div>'}</div>
     ${window.newYearHTML ? newYearHTML() : ''}
     <div class="note">🔒 الصلاحيات يفرضها الخادم: كل عضو يرى ويعدّل قسمه فقط، ورئيس القسم يطّلع فقط، وأ. «باحث المستقبل» يرى بيانات الطلاب، والطالب يرى بياناته فقط.</div>`;
     const syncUnit = () => { el.querySelector('#adUnitL').style.display = el.querySelector('#adRole').value === 'member' ? '' : 'none' }; syncUnit();
@@ -259,7 +259,12 @@
       try { await removeStudent(b.dataset.rmstu); toast && toast('🗑️ حُذف الطالب') }
       catch (e) { b.disabled = false; b.textContent = 'حذف'; toast && toast('تعذّر الحذف: ' + (/غير مسموح|ليس حساب طالب/.test(e.message) ? (e.message.match(/غير مسموح|هذا الحساب ليس حساب طالب/) || [''])[0] : 'تأكدي من الاتصال، ومن تشغيل ملف إعداد قاعدة البيانات')) }
     });
-    el.querySelectorAll('[data-goStud]').forEach(b => b.onclick = () => { const n = document.querySelector('#nav [data-v=stud]'); n && n.click(); scrollTo(0, 0) });
+    el.querySelectorAll('[data-goStud]').forEach(b => b.onclick = () => {
+      const card = document.querySelector('#v-stud [data-s="app:student:' + b.dataset.gostud + '"]');
+      if (!card) { toast && toast('«' + (b.dataset.nm || 'الطالب') + '» سجّل حسابه لكنه لم يبدأ بعد في صفحته، فلا توجد مهام أو ساعات لعرضها 🌱'); return }
+      const n = document.querySelector('#nav [data-v=stud]'); n && n.click();
+      setTimeout(() => { const c = document.querySelector('#v-stud [data-s="app:student:' + b.dataset.gostud + '"]'); if (!c) return; const d = c.querySelector('details'); if (d) d.open = true; c.scrollIntoView({ behavior: 'smooth', block: 'start' }); c.style.transition = 'box-shadow .3s'; c.style.boxShadow = '0 0 0 3px #00a3c4'; setTimeout(() => c.style.boxShadow = '', 2200) }, 150);
+    });
     el.querySelectorAll('[data-adDel]').forEach(b => b.onclick = async () => { if (!(await ask('إزالة صلاحية ' + b.dataset.addel + '؟', 'إزالة'))) return; try { await rest('DELETE', 'allowlist?email=eq.' + encodeURIComponent(b.dataset.addel)); renderAdmin() } catch (e) { toast && toast('تعذّرت الإزالة') } });
   }
 
@@ -293,7 +298,7 @@
   async function boot() {
     PAGE = typeof ROLE !== 'undefined' ? ROLE : (typeof MISSIONS !== 'undefined' ? 'student' : 'index');
     const css = document.createElement('style');
-    css.textContent = '.ro main input,.ro main select,.ro main textarea,.ro main .seg,.ro main [data-mv],.ro main [data-up],.ro main [data-del],.ro main [data-done],.ro main #addStu,.ro main #addP,.ro main [data-delev],.ro main [data-delstu],.ro main [data-delp]{pointer-events:none!important;opacity:.55}.ro #nav [data-v=admin],.ro #nav [data-v=receive]{display:none}[data-s^="app:"] input,[data-s^="app:"] select,[data-s^="app:"] .seg,[data-s^="app:"] button{pointer-events:none!important;opacity:.6}.ro .hero .top:after{content:"👁️ اطلاع فقط";font-size:12px;background:rgba(255,255,255,.15);padding:3px 10px;border-radius:12px}';
+    css.textContent = '.ro main input,.ro main select,.ro main textarea,.ro main .seg,.ro main [data-mv],.ro main [data-up],.ro main [data-del],.ro main [data-done],.ro main #addStu,.ro main #addP,.ro main [data-delev],.ro main [data-delstu],.ro main [data-delp]{pointer-events:none!important;opacity:.55}.ro #nav [data-v=admin],.ro #nav [data-v=receive]{display:none}[data-s^="app:"] input,[data-s^="app:"] select,[data-s^="app:"] .seg,[data-s^="app:"] button:not([data-rmstu]):not([data-strep]){pointer-events:none!important;opacity:.6}.ro .hero .top:after{content:"👁️ اطلاع فقط";font-size:12px;background:rgba(255,255,255,.15);padding:3px 10px;border-radius:12px}';
     document.head.appendChild(css);
     await recoveryFlow();
     if (!session) await loginScreen();
