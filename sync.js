@@ -114,7 +114,7 @@
   }
 
   /* ---------- data mapping ---------- */
-  const unitOf = { ideas: x => x.role, tasks: x => x.role, research: () => 'research', acts: x => x.role, students: () => 'students', partners: () => 'chair', evidence: x => x.role === 'students' && x.fromStudent ? null : x.role };
+  const unitOf = { ideas: x => x.role, tasks: x => x.role, research: () => 'research', acts: x => x.role, students: () => 'students', partners: () => 'chair', minutes: () => 'evidence', sigs: x => x.role, sigimg: x => x.role, evidence: x => x.role === 'students' && x.fromStudent ? null : x.role };
   function canWrite(unit) { if (!profile) return false; if (profile.role === 'chair') return true; if (profile.role === 'member') return unit === profile.unit; return false }
   function studentEntry(it) {
     const d = it.data || {};
@@ -148,7 +148,7 @@
     const kp = items.find(i => i.id === 'kpi'); if (kp) S.kpi = kp.data || {};
     const stuApp = items.filter(i => i.kind === 'student');
     S.students = by('students').concat(stuApp.map(studentEntry));
-    S.evidence = by('evidence');
+    S.evidence = by('evidence'); S.minutes = by('minutes'); S.sigs = by('sigs'); S.sigimg = by('sigimg');
     stuApp.forEach(it => (it.data.evidence || []).forEach(ev => { if (ev.path) S.evidence.push({ id: ev.id, role: 'students', fromStudent: true, name: ev.name, size: ev.size, type: ev.type, link: 's:app:' + it.id, cat: 'دليل طالب', added: ev.added, path: ev.path }) }));
     ARCH = {}; S.archives = items.filter(i => i.kind === 'archive').map(i => { ARCH[i.id] = i.data; return { id: i.id, year: (i.data || {}).year, date: (i.data || {}).date } }).sort((a, b) => b.year - a.year);
     snapshot = {}; items.forEach(i => { if (i.kind !== 'student' && i.kind !== 'archive') snapshot[i.id] = JSON.stringify(i.data) });
@@ -156,7 +156,7 @@
   function currentRows() {
     if (PAGE === 'student') { const d = Object.assign({}, S); delete d.lastSent; return [{ id: 'student:' + session.user.id, kind: 'student', unit: 'student', data: d }] }
     const rows = [];
-    for (const k of ['tasks', 'ideas', 'research', 'acts', 'students', 'partners', 'evidence']) for (const x of (S[k] || [])) {
+    for (const k of ['tasks', 'ideas', 'research', 'acts', 'students', 'partners', 'evidence', 'minutes', 'sigs', 'sigimg']) for (const x of (S[k] || [])) {
       if (x.fromApp || x.fromStudent) continue; const u = unitOf[k](x); if (!u || !canWrite(u)) continue; rows.push({ id: x.id, kind: k, unit: u, data: x });
     }
     if (canWrite('chair')) rows.push({ id: 'kpi', kind: 'kpi', unit: 'chair', data: S.kpi || {} });
@@ -203,11 +203,26 @@
     if (pending) { pending = false; setTimeout(push, status === 'ok' ? 50 : 8000) }
   }
   function dirty() { clearTimeout(dirtyT); setStatus('saving'); dirtyT = setTimeout(() => { dirtyT = null; push() }, 700) }
+  /* ---------- team agreement e-signatures ---------- */
+  async function agrPull() {
+    if (!profile || profile.role === 'student') return false;
+    try {
+      const r = await rest('GET', 'agr_sign?select=token,research_id,idx,member_name,img,signed_at&order=created_at');
+      const v = r.map(x => ({ token: x.token, rid: x.research_id, idx: x.idx, name: x.member_name, img: x.img, at: x.signed_at ? new Date(new Date(x.signed_at).getTime() - new Date().getTimezoneOffset() * 6e4).toISOString() : null }));
+      const ch = JSON.stringify(v) !== JSON.stringify(S.agrs || []); S.agrs = v; return ch;
+    } catch (e) { return false }
+  }
+  async function agrNew(rid, idx, name) {
+    const a = new Uint8Array(24); crypto.getRandomValues(a); const token = [...a].map(b => b.toString(16).padStart(2, '0')).join('');
+    await rest('POST', 'agr_sign', [{ token, research_id: rid, idx, member_name: name }], { Prefer: 'return=minimal' });
+    const row = { token, rid, idx, name, img: null, at: null }; S.agrs = (S.agrs || []).concat([row]); return row;
+  }
   async function pull() {
     if (pushing || dirtyT) return;
     try {
       const items = await rest('GET', 'items?select=id,kind,unit,owner,data,updated_at&order=id');
-      const before = JSON.stringify(ls.get(CACHE)); if (before === JSON.stringify(items)) { setStatus('ok'); return }
+      const ag = await agrPull();
+      const before = JSON.stringify(ls.get(CACHE)); if (before === JSON.stringify(items)) { if (ag) window.__rawRender && window.__rawRender(); setStatus('ok'); return }
       applyItems(items); window.__rawRender && window.__rawRender(); setStatus('ok');
     } catch (e) { setStatus(/fetch|network/i.test(e.message) ? 'offline' : status) }
   }
@@ -295,5 +310,5 @@
     const nv = document.getElementById('nav'); if (nv) nv.addEventListener('click', e => { if (e.target.closest('[data-v=admin]')) renderAdmin() });
   }
 
-  window.SYNC = { setName, removeStudent, archiveYear, getArchive, boot, dirty, afterRender, fetchFile, renderAdmin, get profile() { return profile }, logout, _push: push, _pull: pull };
+  window.SYNC = { agrNew, agrPull, setName, removeStudent, archiveYear, getArchive, boot, dirty, afterRender, fetchFile, renderAdmin, get profile() { return profile }, logout, _push: push, _pull: pull };
 })();
